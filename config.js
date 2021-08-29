@@ -5,5 +5,5 @@
   */
 
 const CONFIG = {
-  score_path: "./_source/12_petits_preludes_Bach.jpg"
+  score_path: "./_source/partition.jpg"
 }
