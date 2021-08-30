@@ -21,14 +21,19 @@ div.ligne_coupe {
 }
 
 
-button, textarea {
+button, textarea, input[type="text"] {
   font-size: inherit;
+  font-family: inherit;
 }
 
 footer {
   position: fixed;
+  display: block;
+  width: 100%;
   bottom: 0;
-  left: 0;  
+  left: 0;
+  background-color: white;
+  padding-left: 1em;
 }
 
 div#panneau_information {
@@ -42,6 +47,9 @@ div#panneau_information {
   z-index: 90;
 }
 
+input[type="text"]#num_first_system {
+  width: 40px;
+}
 button#decouper {
   background-color: green;
   color: white;
@@ -85,6 +93,7 @@ div.emporte_piece span.file_name {
 
 div#message {
   position: fixed;
+  color: white;
   left: calc(100%/2 - 200px);
   width: 400px;
   top: 8em;
@@ -94,10 +103,11 @@ div#message {
 }
 div#message.error {
   background-color: red;
-  color: white;
 }
 div#message.notice {
   background-color: blue;
-  color: white;
+}
+div#message.doaction {
+  background-color: orange;
 }
 

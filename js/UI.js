@@ -16,6 +16,11 @@ class UIClass {
   hideButtonRenoncer(){this.btnRenoncer.classList.add('invisible')}
 
 
+  // Retourne le numéro du premier système voulu
+  getNumberOfFirstSystem(){
+    return Number(this.firstNumberField.value || 1)
+
+  }
 
   // Pour placer le panneau d'information avec le texte +texte+
   showInformation(texte){
@@ -27,21 +32,30 @@ class UIClass {
   }
 
   // Pour afficher le message +msg+
-  showMessage(msg){
-    this.panneauMessage.innerHTML = msg
-    this.panneauMessage.className = 'notice'
-    this.panneauMessage.classList.remove('hidden')
-  }
+  showMessage(msg){ this.showText(msg,'notice') }
   // Pour afficher une erreur (utiliser la méthode 'error')
-  showError(err){
-    this.panneauMessage.innerHTML = err
-    this.panneauMessage.className = 'error'
+  showError(err){   this.showText(err,'error') }
+  // Pour afficher un message d'action
+  showAction(msg){  this.showText(msg, 'doaction') }
+
+  showText(str,type){
+    this.clearTimerMessage()
+    this.panneauMessage.innerHTML = str
+    this.panneauMessage.className = type
     this.panneauMessage.classList.remove('hidden')
+    if ( type !== 'error') this.msgTimer = setTimeout(this.hideMessage.bind(this),20*1000)
   }
 
   hideMessage(){
     this.panneauMessage.innerHTML = ""
     this.panneauMessage.classList.add('hidden')
+    this.clearTimerMessage()
+  }
+  clearTimerMessage(){
+    if ( this.msgTimer ){
+      clearTimeout(this.msgTimer)
+      this.msgTimer = null
+    }
   }
 
   // Appelée quand on double-clic sur la partition
@@ -71,6 +85,9 @@ class UIClass {
   get score(){return this._score || (this._score = document.querySelector('img#score'))}
   get codeField(){
     return this._codefield || (this._codefield = document.querySelector('textarea#code_decoupe'))
+  }
+  get firstNumberField(){
+    return this._firstnum || (this._firstnum = document.querySelector('input#num_first_system'))
   }
   get panneauInformation(){
     return this._infopanel || (this._infopanel = document.querySelector('div#panneau_information'))

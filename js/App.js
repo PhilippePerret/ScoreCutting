@@ -52,7 +52,7 @@ class AppClass {
 
     let div;
     let data = {};
-    let isysteme = 0;
+    let isysteme = UI.getNumberOfFirstSystem() - 1
     for (var i = 0; i < lignes.length ; i += 2){
       data.top    = lignes[i]
       data.bas    = lignes[1 + i]
@@ -91,12 +91,13 @@ class AppClass {
    */
   buildCodeDecoupe(confirmed){
     if ( ! confirmed ){ return this.confirmeDecoupe()}
+    UI.showAction("Découpe des images en cours. Merci de patienter…")
     UI.hideBoutonsConfirmation()
     const lignes = UI.getTopsOfLignesCoupe()
     const source = CONFIG.score_path
     //console.log(lignes)
     var codes = []
-    var isysteme = 0
+    let isysteme = UI.getNumberOfFirstSystem() - 1
     var data = {source:source}
     for (var i = 0; i < lignes.length ; i += 2){
       data.top    = lignes[i]
