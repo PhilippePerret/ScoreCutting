@@ -34,17 +34,17 @@ module ScoreCutting
 
     def self.get_score_path
       retour = {ok: true, error: nil, path: nil}
-      path = ARGV[0]
+      path = ARGV[0].start_with?('-') ? nil : ARGV[0]
       begin
         # 
         # S'il n'y a pas d'argument, on cherche la première image
         # (note : est-ce qu'on ne pourrait pas faire ça au démarrage ?)
         # 
         if path.nil?
-          path = Dir["#{CURRENT_FOLDER}/*.{jpg,jped,png,tiff}"][0]
+          path = Dir["#{current_folder}/*.{jpg,jped,png,tiff}"][0]
         end
-        not(path.nil?) || raise("Image non définie.")
-        path = File.join(CURRENT_FOLDER,path) if not(path.start_with?('/'))
+        not(path.nil?) || raise("Image non définie.") # Si ce texte doit être modifié, modifier aussi ERROR_NO_IMAGE dans App.js
+        path = File.join(current_folder,path) if not(path.start_with?('/'))
         File.exist?(path) || raise("Image introuvable : #{path}.")
         retour[:path] = path
       rescue Exception => e
@@ -54,6 +54,14 @@ module ScoreCutting
         retour[:error] = e.message
       end
       WAA.send({class:'App', method:'askForScore', data: retour })
+    end
+
+    def self.current_folder
+      @@current_folder
+    end
+
+    def self.current_folder=(value)
+      @@current_folder = value
     end
 
   end #/class App

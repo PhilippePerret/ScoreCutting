@@ -43,6 +43,7 @@ module ScoreExtraction
         case argv
         when '--keep',      '-k'      then @@options.merge!(keep:   true)
         when '-prefix'                then @@options.merge!(prefix: valu)
+        when '--path'                 then @@options.merge!(path:   valu)
         end
       end
     end

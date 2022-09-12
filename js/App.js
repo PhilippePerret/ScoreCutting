@@ -1,5 +1,6 @@
 'use strict';
 
+const ERROR_NO_IMAGE = "Image non définie."
 class AppClass {
 
   /**
@@ -36,7 +37,11 @@ class AppClass {
     } else if ( data.ok ) {
       this.load_image(data.path)
     } else {
-      erreur(data.error)
+      if ( data.error == ERROR_NO_IMAGE ) {
+        message(AIDE_UTILISATION)
+      } else {
+        erreur(data.error)
+      }
     }
   }
 
@@ -53,6 +58,7 @@ class AppClass {
       UI.score.addEventListener('load', function(){
         // Partition chargée, on peut commencer
         App.start_decoupe()
+        message(AIDE_DECOUPAGE)
       })
       UI.score.addEventListener('error', function(e){
         alert("Une erreur s'est produite pendant le chargement. Vérifier le chemin d'accès à la partition.")
@@ -195,6 +201,22 @@ class AppClass {
 
 }
 const App = new AppClass()
+
+const AIDE_UTILISATION = `
+<p><b>Utilisation de Score Cutting</b></p>
+<p>Pour utiliser ScoreCutting, vous devez :</p>
+<ul>
+<li>produire une image (jpg, png, tiff) de la partition à découper,</li>
+<li>ouvrir un Terminal au dossier qui la contient,</li>
+<li>puis jouer la commande <code>score-cutting</code>.</li>
+</ul>
+`
+
+const AIDE_DECOUPAGE = `
+<p>La partition est chargée !</p>
+<p>Double-cliquez aux endroits où vous voulez placer des lignes de coupe. Il doit obligatoirement y en avoir deux par système.</p>
+<p>Enfin, cliquez sur le bouton « Découper » pour vérifier et procéder à la découpe après confirmation.</p>
+`
 
 // Si requête ajax : /opt/homebrew/bin/convert
 // const TEMP_CODE_DECOUPE = '/opt/homebrew/bin/convert /Users/philippeperret/Sites/ScoreCutting/__SOURCE__ -crop 0x__HEIGHT__+0+__TOP__ ./__DEST__ 2>&1'

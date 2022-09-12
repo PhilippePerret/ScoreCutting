@@ -4,14 +4,21 @@
 require_relative 'lib/required'
 
 begin
-  WAA.goto File.join(__dir__,'main.html')
-  WAA.run
   
-  # 
-  # On passe ici quand on en a fini
-  # 
-  puts "On en a fini (j'attends une minutes)"
-  sleep 60
+  ScoreExtraction::CommandLine.parse
+  option_path = ScoreExtraction::CommandLine.options[:path]
+
+  if help? || option_path == 'aide'
+    ScoreExtraction::CommandLine.show_help
+  else
+    curdir = option_path ? option_path : CURRENT_FOLDER
+    puts "Dossier courant : #{curdir}"
+    ScoreCutting::App.current_folder = curdir
+    Dir.chdir(curdir) do
+      WAA.goto File.join(__dir__,'main.html')
+      WAA.run
+    end
+  end
 rescue Exception => e
   puts e.message + "\n" + e.backtrace.join("\n")
 ensure
