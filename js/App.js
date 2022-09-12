@@ -3,18 +3,55 @@
 class AppClass {
 
   /**
-   * Pour charger l'image définie en configuration
+   * Pour zoomer ou dézoomer la partition
    */
-  load_image(){
-    const path = CONFIG.score_path
-    if ( !path || path == ''){
-      return alert("Il faut définir le chemin d'accès au fichier de la partition dans config.js")
+  zoomIn(){
+    this.zoomScore(this.zoom + 5)
+  }
+  zoomOut(){
+    this.zoomScore(this.zoom - 5)
+  }
+  zoomScore(zoomValue){
+    if ( zoomValue < 5 ) {
+      return erreur("Valeur de zoom trop petite.")
+    }
+    document.querySelector('#score').style.zoom = `${zoomValue}%`
+    this.zoom = zoomValue
+  }
+  get zoom(){return this._zoom || 100 }
+  set zoom(v) {
+    this._zoom = v
+    document.querySelector('#zoom_value').innerHTML = `${v} %`
+  }
+
+  /**
+   * Pour demander au serveur le chemin de la partition à découper
+   * 
+   * La méthode est appelée pour faire la demande (data = undefined)
+   * et pour la recevoir du serveur avec le chemin dans data
+   */
+  askForScore(data){
+    if ( undefined == data ) {
+      WAA.send({class:'ScoreCutting::App', method:'get_score_path'})
+    } else if ( data.ok ) {
+      this.load_image(data.path)
     } else {
-      UI.score.src = path
+      erreur(data.error)
+    }
+  }
+
+  /**
+   * Pour charger l'image de chemin d'accès +path+
+   * 
+   */
+  load_image(path){
+    if ( !path || path == ''){
+      return erreur("Il faut définir le chemin d'accès en premier argument.")
+    } else {
+      this.source   = path
+      UI.score.src  = path
       UI.score.addEventListener('load', function(){
-        //
         // Partition chargée, on peut commencer
-        //
         App.start_decoupe()
       })
       UI.score.addEventListener('error', function(e){
@@ -23,18 +60,34 @@ class AppClass {
     }
   }
 
+  get score_folder(){
+    this._folder || this.getImageFolderAndName()
+    return this._folder
+  }
+  get score_name(){
+    this._name || this.getImageFolderAndName()
+    return this._name
+  }
+  getImageFolderAndName() {
+    var chemin = this.source.split('/')
+    this._name    = chemin.pop()
+    this._folder  = chemin.join('/')
+  }
+
   /**
    * Pour commencer la découpe une fois que l'image est choisie
    * 
    * 
    */
   start_decoupe(){
+    // Quand on double clique sur la partition ou sur la planche,
+    // on produit une ligne
     UI.score.addEventListener('dblclick', UI.onDoubleClickOnScore.bind(UI))
-    UI.showInformation(PANNEAU_INFORMATION_DEPART)
+    document.body.addEventListener('dblclick', UI.onDoubleClickOnScore.bind(UI)) 
   }
 
   /**
-   * Confirme découpe
+   * Confirmer la découpe
    * 
    * Dans cette méthode, on "surligne" les parties qui font produire
    * les systèmes (en indiquant leur) pour que l'utilisateur confirme
@@ -50,6 +103,10 @@ class AppClass {
       return error("Il doit obligatoirement y avoir un nombre paire de lignes (la ligne de début et la ligne de fin de chaque partie.");
     }
 
+    /*
+     * On relève les paires de lignes de découpe, mais ici
+     * seulement pour un aperçu.
+     */
     let div;
     let data = {};
     let isysteme = UI.getNumberOfFirstSystem() - 1
@@ -71,8 +128,6 @@ class AppClass {
     // afficher le bouton pour confirmer
     UI.showBoutonsConfirmation()
 
-    UI.showInformation(EXPLICATION_CONFIRMATION_DECOUPE)
-
   }
 
   /**
@@ -82,7 +137,6 @@ class AppClass {
     UI.hideBoutonsConfirmation()
     $('.emporte_piece').remove()
   }
-
 
   /**
    * 
@@ -94,18 +148,29 @@ class AppClass {
     UI.showAction("Découpe des images en cours. Merci de patienter…")
     UI.hideBoutonsConfirmation()
     const lignes = UI.getTopsOfLignesCoupe()
-    const source = CONFIG.score_path
     //console.log(lignes)
     var codes = []
     let isysteme = UI.getNumberOfFirstSystem() - 1
-    var data = {source:source}
+    var data = {
+        source: this.score_name
+      , folder: this.score_folder
+    }
+    /*
+     * Relève de toutes les valeurs de découpe
+     *
+     * (on doit tenir compte du zoom)
+     */
+    const zo = 100 / this.zoom ;
+    console.info("zo = ", zo)
     for (var i = 0; i < lignes.length ; i += 2){
-      data.top    = lignes[i]
-      data.bas    = lignes[1 + i]
+      // data.top    = parseInt(lignes[i] * zo, 10)
+      // data.bas    = parseInt(lignes[1 + i] * zo, 10)
+      data.top    = lignes[i] * zo
+      data.bas    = lignes[1 + i] * zo
       data.height = data.bas - data.top
-      data.dest   = `systeme-${++isysteme}.jpg`
+      data.dest   = `system-${++isysteme}.jpg`
       var code = "" + TEMP_CODE_DECOUPE
-      ;['source','height','top','dest'].forEach(prop => {
+      ;['folder','source','height','top','dest'].forEach(prop => {
         var regexp = new RegExp(`__${prop.toUpperCase()}__`)
         code = code.replace(regexp, data[prop])
       })
@@ -113,14 +178,19 @@ class AppClass {
     }
     codes = codes.join(";") + ' 2>&1'
     UI.codeField.value = codes
-    const form = $('#form-code-decoupe').ajaxSubmit({url:'ajax.php', type:'post'})
-    var xhr = form.data('jqxhr');
 
-    xhr.done(function(ret) {
-      console.log("Retour ajax", ret)
-      message(CONFIRMATION_DECOUPE_EFFECTUED)
-    });
+    /* MAINTENANT, PAR WAA
+    */
+    WAA.send({class:"ScoreCutting::App", method:"run_bash_code", data:{folder:this.score_folder, source:this.score_name, code: codes}})
 
+  }
+
+  onCutScore(data){
+    if ( data.ok ) {
+      message(CONFIRMATION_DECOUPE_EFFECTUED.replace(/__FOLDER__/, this.score_folder))
+    } else {
+      erreur(data.error)
+    }
   }
 
 }
@@ -128,14 +198,4 @@ const App = new AppClass()
 
 // Si requête ajax : /opt/homebrew/bin/convert
 // const TEMP_CODE_DECOUPE = '/opt/homebrew/bin/convert /Users/philippeperret/Sites/ScoreCutting/__SOURCE__ -crop 0x__HEIGHT__+0+__TOP__ ./__DEST__ 2>&1'
-const TEMP_CODE_DECOUPE = '/opt/homebrew/bin/convert __SOURCE__ -crop 0x__HEIGHT__+0+__TOP__ ./_systemes/__DEST__'
-
-
-$(document).ready(e => {
-  try{
-    App.load_image()  
-  } catch(err){
-    console.log("Erreur au cours du chargement", err)
-  }
-
-})
+const TEMP_CODE_DECOUPE = 'cd "__FOLDER__" && /opt/homebrew/bin/convert ./__SOURCE__ -crop 0x__HEIGHT__+0+__TOP__ ./systems/__DEST__'

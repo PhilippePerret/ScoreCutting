@@ -2,6 +2,12 @@ body {
   position: relative;
   font-size:  16pt;
   font-family: 'Arial Narrow', serif;
+  padding-top: 20px;
+  padding-bottom: 20em;
+}
+
+* {
+  user-select: none;
 }
 
 .invisible {
@@ -12,12 +18,23 @@ body {
 }
 .right {text-align: right}
 
+.small {
+  font-size: 0.85em;
+}
+.tiny {
+  font-size: 0.65em;
+}
+
 div.ligne_coupe {
   position: absolute;
   width: 100%;
-  height: 20px;
+  height: 2px;
   border-top: 2px solid blue;
   background-color: rgba(250,250,250,0.8);
+  cursor: ns-resize;
+}
+div.ligne_coupe:hover {
+  height: 20px;
 }
 
 
@@ -51,9 +68,15 @@ input[type="text"]#num_first_system {
   width: 40px;
 }
 button#decouper {
-  background-color: green;
-  color: white;
   padding: 2px 1em 6px;
+}
+button.main:not(.inactif){
+  background-color: green;  
+  color: white;
+}
+button.main.inactif {
+  background-color: inherit;  
+  color: inherit;
 }
 span.as_bouton {
   display: inline-block;

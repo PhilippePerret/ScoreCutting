@@ -10,8 +10,16 @@ class UIClass {
     UI.hideButtonRenoncer()
   }
 
-  showButtonConfirmer(){this.btnConfirmer.classList.remove('invisible')}
-  hideButtonConfirmer(){this.btnConfirmer.classList.add('invisible')}
+  showButtonConfirmer(){
+    this.btnConfirmer.classList.remove('invisible')
+    this.btnConfirmer.classList.remove('inactif')
+    this.btnDecouper.classList.add('inactif')
+  }
+  hideButtonConfirmer(){
+    this.btnConfirmer.classList.add('invisible')
+    this.btnConfirmer.classList.add('inactif')
+    this.btnDecouper.classList.remove('inactif')
+  }
   showButtonRenoncer(){this.btnRenoncer.classList.remove('invisible')}
   hideButtonRenoncer(){this.btnRenoncer.classList.add('invisible')}
 
@@ -61,21 +69,34 @@ class UIClass {
   // Appelée quand on double-clic sur la partition
   onDoubleClickOnScore(e){
     //console.log("e = ", e)
-    LigneCoupe.createAt(e.layerY) // NON : clientY
+    LigneCoupe.createAt(e.layerY) // PAS : clientY
+    e.stopPropagation()
+    e.preventDefault()
+    return false
   }
 
   // Retourne les lignes de coupe
   getTopsOfLignesCoupe(){
     var ls = []
     document.querySelectorAll('div.ligne_coupe').forEach(div => {
-      ls.push(unpx(div.style.top))
+      ls.push(unpx(div.style.top) - 20 /* padding-top de body */) 
     })
     return ls.sort(function(a, b) {return a - b});
   }
 
+  /**
+   * Détruit toutes les lignes
+   */
+  removeAllLines(){
+    document.querySelectorAll('div.ligne_coupe').forEach(div => {
+      div.remove()
+    })    
+  }
 
 
-
+  get btnDecouper(){
+    return this._btncrop || (this._btncrop = document.querySelector('button#decouper'))
+  }
   get btnConfirmer(){
     return this._btnconfirm || (this._btnconfirm = document.querySelector('button#confirmer_decoupe'))
   }

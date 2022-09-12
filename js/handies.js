@@ -18,3 +18,4 @@ function error(err){
   UI.showError(err)
   return false
 }
+function erreur(err){return error(err)}
