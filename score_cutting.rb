@@ -8,13 +8,14 @@ begin
   # ScoreExtraction::CommandLine.parse
   # option_path = ScoreExtraction::CommandLine.options[:path]
 
-  if help? || option_path == 'aide'
+  if help?
     require File.join(MOD_FOLDER,'help')
     ScoreCutting::CommandLine.show_help
   else
-    curdir = option_path ? option_path : CURRENT_FOLDER
+    curdir = CURRENT_FOLDER
     puts "Dossier courant : #{curdir}"
     ScoreCutting::App.current_folder = curdir
+    ScoreCutting::App.check_and_get_partition || raise("Abandon.")
     Dir.chdir(curdir) do
       WAA.goto File.join(__dir__,'main.html')
       WAA.run
