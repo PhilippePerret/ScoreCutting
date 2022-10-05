@@ -4,33 +4,10 @@ module ScoreExtraction
 
   class CommandLine
 
-    ##
-    # Affichage des options
-    def self.show_options
-      clear
-      puts <<-TEXT.bleu
-
- ScoreCutting Options
- -----------------------
-
-
-      TEXT
-    end
-
     def self.show_help
       clear
       less <<-TEXT
 
-  Aide ScoreCutting
-  -----------------
-
-  Cette app permet de découper une partition en systèmes.
-
-  Commande :
-
-    #{'score-cutting [<options>]'.jaune}
-
-    Pour voir les options, jouer #{'source-extract options'.jaune}.
 
       TEXT
     end

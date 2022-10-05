@@ -5,11 +5,12 @@ require_relative 'lib/required'
 
 begin
   
-  ScoreExtraction::CommandLine.parse
-  option_path = ScoreExtraction::CommandLine.options[:path]
+  # ScoreExtraction::CommandLine.parse
+  # option_path = ScoreExtraction::CommandLine.options[:path]
 
   if help? || option_path == 'aide'
-    ScoreExtraction::CommandLine.show_help
+    require File.join(MOD_FOLDER,'help')
+    ScoreCutting::CommandLine.show_help
   else
     curdir = option_path ? option_path : CURRENT_FOLDER
     puts "Dossier courant : #{curdir}"
